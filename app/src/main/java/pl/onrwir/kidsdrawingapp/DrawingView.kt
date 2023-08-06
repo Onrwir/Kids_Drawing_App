@@ -16,14 +16,15 @@ class DrawingView(context: Context, attrs: AttributeSet) : View(context, attrs){
     private var color = Color.BLACK
     private var canvas: Canvas? = null
     private val mPaths = ArrayList<CustomPath>()
+    private val pathPaint = Paint()
 
     init{
         setupDrawing()
     }
 
     private fun setupDrawing(){
-        mDrawPaint = Paint()
         mDrawPath = CustomPath(color, mBrushSize)
+        mDrawPaint = Paint()
         mDrawPaint!!.color = color
         mDrawPaint!!.style = Paint.Style.STROKE
         mDrawPaint!!.strokeJoin = Paint.Join.ROUND
@@ -40,44 +41,50 @@ class DrawingView(context: Context, attrs: AttributeSet) : View(context, attrs){
     }
 
     // Change Canvas to Canvas? if fails
-    override fun onDraw(canvas: Canvas?) {
+    override fun onDraw(canvas: Canvas) {
         super.onDraw(canvas)
-        canvas?.drawBitmap(mCanvasBitMap!!, 0f, 0f, mCanvasPaint)
-        for (path in mPaths){
-            mDrawPaint!!.strokeWidth = path.brushThickness
-            mDrawPaint!!.color = path.color
-            canvas?.drawPath(path, mDrawPaint!!)
+        mCanvasBitMap?.let {
+            canvas.drawBitmap(it, 0f, 0f, mCanvasPaint)
+        }
+
+        for (path in mPaths) {
+            pathPaint.strokeWidth = path.brushThickness
+            pathPaint.color = path.color
+            pathPaint.style = Paint.Style.STROKE
+            pathPaint.strokeJoin = Paint.Join.ROUND
+            pathPaint.strokeCap = Paint.Cap.ROUND
+            canvas.drawPath(path, pathPaint)
         }
         if (!mDrawPath!!.isEmpty) {
             mDrawPaint!!.strokeWidth = mDrawPath!!.brushThickness
             mDrawPaint!!.color = mDrawPaint!!.color
-            canvas?.drawPath(mDrawPath!!, mDrawPaint!!)
+            canvas.drawPath(mDrawPath!!, mDrawPaint!!)
         }
     }
 
-    override fun onTouchEvent(event: MotionEvent?): Boolean {
-        val touchX = event?.x
-        val touchY = event?.y
+    override fun onTouchEvent(event: MotionEvent): Boolean {
+        val touchX = event.x
+        val touchY = event.y
 
-        when(event?.action){
+        when(event.action){
             MotionEvent.ACTION_DOWN -> {
                 mDrawPath!!.color = color
                 mDrawPath!!.brushThickness = mBrushSize
 
                 mDrawPath!!.reset()
-                if (touchX != null) {
-                    if (touchY != null) {
-                        mDrawPath!!.moveTo(touchX, touchY)
-                    }
-                }
+                mDrawPath!!.moveTo(
+                    touchX,
+                    touchY
+                ) // Set the beginning of the next contour to the point (x,y).
             }
+
             MotionEvent.ACTION_MOVE -> {
-                if (touchX != null) {
-                    if (touchY != null) {
-                        mDrawPath!!.lineTo(touchX, touchY)
-                    }
-                }
+                mDrawPath!!.lineTo(
+                    touchX,
+                    touchY
+                ) // Add a line from the last point to the specified point (x,y).
             }
+
             MotionEvent.ACTION_UP -> {
                 mPaths.add(mDrawPath!!)
                 mDrawPath = CustomPath(color, mBrushSize)
@@ -85,17 +92,23 @@ class DrawingView(context: Context, attrs: AttributeSet) : View(context, attrs){
             }
             else -> return false
         }
-        invalidate()
 
+        invalidate()
         return true
     }
 
     fun setSizeForBrush(newSize : Float){
-        mBrushSize = TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP,
+        mBrushSize = TypedValue.applyDimension(
+            TypedValue.COMPLEX_UNIT_DIP,
             newSize,
             resources.displayMetrics
         )
         mDrawPaint!!.strokeWidth = mBrushSize
+    }
+
+    fun setColor(newColor: String){
+        color = Color.parseColor(newColor)
+        mDrawPaint!!.color = color
     }
 
     // An inner class for custom path with two params as color and stroke
