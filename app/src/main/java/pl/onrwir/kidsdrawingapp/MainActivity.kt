@@ -2,12 +2,16 @@ package pl.onrwir.kidsdrawingapp
 
 import android.app.Activity
 import android.app.Dialog
+import android.content.Intent
 import android.content.pm.PackageManager
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
+import android.provider.MediaStore
+import android.util.Log
 import android.view.View
 import android.widget.Button
 import android.widget.ImageButton
+import android.widget.ImageView
 import android.widget.LinearLayout
 import android.widget.Toast
 import androidx.activity.result.ActivityResultLauncher
@@ -22,19 +26,26 @@ class MainActivity : AppCompatActivity() {
     private var drawingView : DrawingView? = null
     private var mImageButtonCurrentPaint : ImageButton? = null
 
+    val openGalleryLauncher: ActivityResultLauncher<Intent> =
+        registerForActivityResult(ActivityResultContracts.StartActivityForResult()){
+            result ->
+            if(result.resultCode == RESULT_OK && result.data!=null){
+                val imageBacground : ImageView = findViewById(R.id.iv_background)
+
+                imageBacground.setImageURI(result.data?.data)
+            }
+        }
+
     val requestPermission: ActivityResultLauncher<Array<String>> =
-        registerForActivityResult(ActivityResultContracts.RequestMultiplePermissions()){
-            permissions ->
+        registerForActivityResult(ActivityResultContracts.RequestMultiplePermissions()
+        ){  permissions ->
             permissions.entries.forEach{
                 val permissionName = it.key
                 val isGranted = it.value
 
                 if (isGranted){
-                    Toast.makeText(
-                        this,
-                        "Permission granted, now you can read the storage files.",
-                        Toast.LENGTH_LONG
-                    ).show()
+                    Log.i("Permission:",permissionName + " Granted")
+
                 }else{
                     if (permissionName==android.Manifest.permission.READ_EXTERNAL_STORAGE){
                         Toast.makeText(
@@ -42,6 +53,7 @@ class MainActivity : AppCompatActivity() {
                             "Permission denied.",
                             Toast.LENGTH_LONG
                         ).show()
+                        Log.i("Permission:",permissionName + " Denied")
                     }
                 }
             }
@@ -115,20 +127,17 @@ class MainActivity : AppCompatActivity() {
                 this,
                 android.Manifest.permission.READ_EXTERNAL_STORAGE
             ) == PackageManager.PERMISSION_GRANTED -> {
-
+//                Permisssion is granted
                 Toast.makeText(
                     this,
                     "Permission granted, now you can read the storage files.",
                     Toast.LENGTH_LONG
                 ).show()
 
-                //Permisssion is granted
-//                requestPermission.launch(
-//                arrayOf(
-//                android.Manifest.permission.READ_EXTERNAL_STORAGE
-//            // TODO - Add writing external storage permission
-//                    )
-//                )
+                val pickIntent = Intent(Intent.ACTION_PICK, MediaStore.Images.Media.EXTERNAL_CONTENT_URI)
+                openGalleryLauncher.launch(pickIntent)
+
+
             }
             ActivityCompat.shouldShowRequestPermissionRationale(
                 this,
@@ -151,19 +160,6 @@ class MainActivity : AppCompatActivity() {
 
 
         }
-//        if (ActivityCompat.shouldShowRequestPermissionRationale(
-//                this,
-//                android.Manifest.permission.READ_EXTERNAL_STORAGE)
-//        ){
-//            showRationalDialog("Kids Drawing App", "Kids Drawing App needs to Access Your External Storage")
-//        }else{
-//            requestPermission.launch(
-//                arrayOf(
-//                android.Manifest.permission.READ_EXTERNAL_STORAGE
-//            // TODO - Add writing external storage permission
-//                )
-//            )
-//        }
     }
 
     private fun showRationalDialog(
