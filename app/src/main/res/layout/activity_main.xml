@@ -21,8 +21,7 @@
         android:id="@+id/iv_background"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:scaleType="centerCrop"
-        android:src="@drawable/paris_image"/>
+        android:scaleType="centerCrop"/>
 
     <pl.onrwir.kidsdrawingapp.DrawingView
         android:id="@+id/drawing_view"
@@ -154,7 +153,28 @@
         android:layout_height="50dp"
         android:layout_margin="5dp"
         android:contentDescription="LoadBackground"
-        android:src="@drawable/ic_gallery_resized"/>
+        android:src="@drawable/ic_gallery"
+        android:scaleType="fitCenter"/>
+
+    <ImageButton
+        android:id="@+id/ib_undo"
+        android:layout_width="50dp"
+        android:layout_height="50dp"
+        android:layout_margin="5dp"
+        android:contentDescription="Undo"
+        android:src="@drawable/ic_undo"
+        android:scaleType="fitCenter"/>
+
+    <ImageButton
+        android:id="@+id/ib_redo"
+        android:layout_width="50dp"
+        android:layout_height="50dp"
+        android:layout_margin="5dp"
+        android:contentDescription="Redo"
+        android:src="@drawable/ic_undo"
+        android:scaleType="fitCenter"
+        android:scaleX="-1"
+        />
 
     <ImageButton
         android:id="@+id/ib_brush"
@@ -162,7 +182,17 @@
         android:layout_height="50dp"
         android:layout_margin="5dp"
         android:contentDescription="BrushSize"
-        android:src="@drawable/ic_brush_resized"/>
+        android:src="@drawable/ic_brush"
+        android:scaleType="fitCenter"/>
+
+    <ImageButton
+        android:id="@+id/ib_save"
+        android:layout_width="50dp"
+        android:layout_height="50dp"
+        android:layout_margin="5dp"
+        android:contentDescription="Save"
+        android:src="@drawable/ic_save"
+        android:scaleType="fitCenter"/>
 
 </LinearLayout>
 
